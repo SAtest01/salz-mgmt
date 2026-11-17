@@ -52,6 +52,15 @@ run "saudi_available_services_profile" {
 
   assert {
     condition = (
+      module.config.outputs.management_group_settings.location == "uaenorth" &&
+      module.config.outputs.virtual_hubs.primary.location == "saudiarabiaeast" &&
+      jsondecode(local.policy_default_values.resource_group_location).value == "saudiarabiaeast"
+    )
+    error_message = "Policy-assignment identities must use UAE North while networking and policy-deployed resource groups remain in Saudi Arabia East."
+  }
+
+  assert {
+    condition = (
       module.config.outputs.virtual_hubs.primary.enabled_resources.private_dns_zones &&
       !module.config.outputs.virtual_hubs.primary.enabled_resources.private_dns_resolver &&
       module.config.outputs.virtual_hubs.primary.private_dns_zones.auto_registration_zone_enabled
