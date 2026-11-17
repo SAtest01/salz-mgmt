@@ -57,6 +57,12 @@ Saudi Arabia East. User-assigned identities are supported by Azure Policy, but
 switching identity type is not established as a workaround for this regional
 failure; this profile retains the standard, separately permissioned identities.
 
+The ALZ module applies one location to all policy assignments, including those
+without identities. Changing this input also replaces existing audit/deny
+assignments because their assignment location is immutable in Terraform.
+Review these replacements and the temporary enforcement gaps before applying;
+the change does not require replacing networking resources.
+
 These exclusions mean there is no centralized Log Analytics ingestion, VM
 Insights/change tracking, or workspace-backed Defender configuration supplied by
 this profile. Both Microsoft cloud security benchmarks and independent endpoint
