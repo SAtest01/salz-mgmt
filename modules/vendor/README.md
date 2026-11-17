@@ -18,7 +18,10 @@ upstream commit. Other dependencies retain their original version constraints.
 - Virtual WAN selects the local Private DNS module. Its two upstream-relative
   child module sources are replaced with equivalent immutable Git sources.
 - Private DNS uses `sae` for `saudiarabiaeast`, retaining upstream geo codes for
-  every other region. No services or DNS zones are disabled.
+  every other region. The compatibility patch does not disable DNS zones.
+- The deployment configuration separately disables Private DNS Resolver after
+  Azure rejected its regional availability. Zones, VNet links, auto-registration,
+  and their policy configuration remain enabled.
 - `platform-landing-zone.auto.tfvars` supplies the matching
   `dnzZoneRegionShortNames` parameter to the `corp` management group's
   `Deploy-Private-DNS-Zones` policy assignment. This map replaces that parameter

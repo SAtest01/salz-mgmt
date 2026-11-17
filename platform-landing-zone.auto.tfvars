@@ -60,7 +60,7 @@ custom_replacements = {
     primary_virtual_network_gateway_vpn_enabled           = false
     primary_private_dns_zones_enabled                     = true
     primary_private_dns_auto_registration_zone_enabled    = true
-    primary_private_dns_resolver_enabled                  = true
+    primary_private_dns_resolver_enabled                  = false
     primary_bastion_enabled                               = true
     primary_sidecar_virtual_network_enabled               = true
 
@@ -129,7 +129,8 @@ tags = {
 --- Management Resources ---
 You can use this section to customize the management resources that will be deployed.
 */
-management_resources_enabled = true
+# The monitoring module requires Log Analytics, which is not available in Saudi Arabia East.
+management_resources_enabled = false
 
 management_resource_settings = {
   location                     = "$${starter_location_01}"
@@ -169,20 +170,12 @@ management_group_settings = {
   location           = "$${starter_location_01}"
   parent_resource_id = "$${root_parent_management_group_id}"
   policy_default_values = {
-    ama_change_tracking_data_collection_rule_id = "$${ama_change_tracking_data_collection_rule_id}"
-    ama_mdfc_sql_data_collection_rule_id        = "$${ama_mdfc_sql_data_collection_rule_id}"
-    ama_vm_insights_data_collection_rule_id     = "$${ama_vm_insights_data_collection_rule_id}"
-    ama_user_assigned_managed_identity_id       = "$${ama_user_assigned_managed_identity_id}"
-    ama_user_assigned_managed_identity_name     = "$${ama_user_assigned_managed_identity_name}"
-    log_analytics_workspace_id                  = "$${log_analytics_workspace_id}"
-    ddos_protection_plan_id                     = "$${ddos_protection_plan_id}"
-    private_dns_zone_subscription_id            = "$${subscription_id_connectivity}"
-    private_dns_zone_region                     = "$${starter_location_01}"
-    private_dns_zone_resource_group_name        = "$${dns_resource_group_name}"
-    resource_group_name_service_health_alerts   = "$${service_health_alerts_resource_group_name}"
-    resource_group_name_mdfc                    = "$${asc_export_resource_group_name}"
-    resource_group_location                     = "$${starter_location_01}"
-    email_security_contact                      = "$${defender_email_security_contact}"
+    ddos_protection_plan_id                   = "$${ddos_protection_plan_id}"
+    private_dns_zone_subscription_id          = "$${subscription_id_connectivity}"
+    private_dns_zone_region                   = "$${starter_location_01}"
+    private_dns_zone_resource_group_name      = "$${dns_resource_group_name}"
+    resource_group_name_service_health_alerts = "$${service_health_alerts_resource_group_name}"
+    resource_group_location                   = "$${starter_location_01}"
     /*
     # Example of allowed locations for Sovereign Landing Zones policies
     allowed_locations = [
@@ -216,26 +209,6 @@ management_group_settings = {
             dnzZoneRegionShortNames = {
               saudiarabiaeast = "sae"
             }
-          }
-        }
-      }
-    }
-    salz = {
-      policy_assignments = {
-        Deploy-MDFC-Config-H224 = {
-          parameters = {
-            enableAscForServers                         = "Disabled"
-            enableAscForServersVulnerabilityAssessments = "Disabled"
-            enableAscForSql                             = "Disabled"
-            enableAscForAppServices                     = "Disabled"
-            enableAscForStorage                         = "Disabled"
-            enableAscForContainers                      = "Disabled"
-            enableAscForKeyVault                        = "Disabled"
-            enableAscForSqlOnVm                         = "Disabled"
-            enableAscForArm                             = "Disabled"
-            enableAscForOssDb                           = "Disabled"
-            enableAscForCosmosDbs                       = "Disabled"
-            enableAscForCspm                            = "Disabled"
           }
         }
       }
@@ -352,8 +325,10 @@ virtual_hubs = {
     bastion = {
       subnet_address_prefix = "$${primary_bastion_subnet_address_prefix}"
       name                  = "$${primary_bastion_host_name}"
+      zones                 = []
       bastion_public_ip = {
-        name = "$${primary_bastion_host_public_ip_name}"
+        name  = "$${primary_bastion_host_public_ip_name}"
+        zones = []
       }
     }
     sidecar_virtual_network = {
