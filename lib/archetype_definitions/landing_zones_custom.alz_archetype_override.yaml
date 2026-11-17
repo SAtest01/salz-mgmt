@@ -2,7 +2,7 @@ base_archetype: landing_zones
 name: landing_zones_custom
 policy_assignments_to_add: []
 policy_assignments_to_remove: [
-# To remove AMA policies, uncomment the following lines:
+  Deploy-AzSqlDb-Auditing,
   Deploy-MDFC-DefSQL-AMA,
   Deploy-VM-ChangeTrack,
   Deploy-VM-Monitoring,
@@ -10,7 +10,6 @@ policy_assignments_to_remove: [
   Deploy-vmHybr-Monitoring,
   Deploy-VMSS-ChangeTrack,
   Deploy-VMSS-Monitoring,
-# To remove the DDOS modify policy, uncomment the following line:
   Enable-DDoS-VNET,
 ]
 policy_definitions_to_add: []

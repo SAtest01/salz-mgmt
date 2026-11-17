@@ -3,13 +3,21 @@
 This module is part of the Azure Landing Zones Accelerator solution. It is a complete multi-region implementation of the Azure Landing Zones Platform Landing Zone for Terraform.
 
 This deployment includes a pinned [Saudi Arabia East DNS compatibility patch](modules/vendor/README.md).
-It preserves the full DNS configuration and uses the Azure-confirmed Backup zone
+It preserves private DNS zones and uses the Azure-confirmed Backup zone
 `privatelink.sae.backup.windowsazure.com`. Run `tests\Invoke-Tests.ps1` before an
 authenticated CI plan; passing mocked tests is not deployment approval.
 
+Private DNS Resolver is intentionally disabled because Azure rejected its creation
+in Saudi Arabia East. Private DNS zones, VNet links, auto-registration, and their
+policy configuration remain enabled. The resolver's endpoints and dedicated
+subnet are also omitted by the networking module; review a fresh plan for removals
+after a partial deployment. DNS forwarding from on-premises or custom DNS servers
+requires an alternative resolver design.
+
 It deploys a hub and spoke virtual network or Virtual WAN architecture across multiple regions.
 
-The module deploys the following resources:
+The module supports the following resources; the Saudi profile below deliberately
+omits unsupported capabilities:
 
 - Management group hierarchy
 - Azure Policy definitions and assignments
@@ -18,6 +26,57 @@ The module deploys the following resources:
 - Hub and spoke virtual network or Virtual WAN architecture across multiple regions
 - DDOS protection plan
 - Private DNS zones
+
+## Saudi Arabia East deployment profile
+
+`platform-landing-zone.auto.tfvars` configures one region, `saudiarabiaeast`.
+The profile keeps the standard ALZ management-group IDs, Virtual WAN, the sidecar
+VNet, Bastion, and Private DNS zones and links. Global governance and Private DNS
+resources still use Azure's `global` location where required.
+
+| Capability | Saudi profile |
+| --- | --- |
+| Private DNS Resolver | Disabled, including its endpoints and dedicated subnet. Zones and links remain enabled. |
+| Log Analytics and central monitoring | Disabled: Azure rejected the workspace location, and the subscription's provider metadata also omits Saudi Arabia East for data collection rules/endpoints. The management module requires a workspace, so its monitoring resource group, AMA identity, DCRs, solutions, and optional Sentinel onboarding are omitted together. |
+| Monitoring deployment policies | Root overrides remove activity/resource log export and the workspace-backed Defender configuration assignment. Landing-zone overrides also remove SQL auditing to Log Analytics. Existing platform/landing-zone AMA exclusions remain in place. |
+| Bastion | Enabled with `zones = []` on the host. The existing zone-redundant Standard public IP is left unchanged; Azure rejected Bastion host zones, not that successfully created public IP. |
+
+Microsoft's [Bastion public IP compatibility table](https://learn.microsoft.com/azure/bastion/configuration-settings#configure-public-ip-addresses-with-availability-zones-configured)
+allows a nonzonal Bastion host to use an existing zonal or nonzonal public IP.
+
+These exclusions mean there is no centralized Log Analytics ingestion, VM
+Insights/change tracking, or workspace-backed Defender configuration supplied by
+this profile. Both Microsoft cloud security benchmarks and independent endpoint
+protection/integration policies remain assigned; monitoring audit controls can
+therefore report intentional noncompliance. This reduced profile is not equivalent
+to the full ALZ monitoring and security baseline. No replacement workspace or
+monitoring destination is configured outside Saudi Arabia. Availability is
+subscription-specific and can change; recheck it before re-enabling omitted
+capabilities.
+
+### Recovering the partially deployed environment
+
+Keep the existing remote Terraform state. Run **01 CI** for a fresh plan before
+**02 CD**; a previous successful plan cannot be reused after changing this profile.
+Review all deletions/replacements, especially the monitoring resource group and
+its unused AMA identity, the DNS resolver subnet, and the failed Bastion host.
+Disabling a managed resource group can delete any resources inside it, including
+resources not represented in this configuration.
+
+Management-group IDs are tenant-wide unique. The configured child IDs, including
+`platform`, must no longer exist under the old Contoso hierarchy before this
+deployment can create them under `salz`. The environment owner is handling that
+cleanup separately; this configuration neither renames nor deletes those groups.
+Confirm all configured IDs, not just `platform`, are free or already owned by
+this deployment. A plan run as a signed-in user does not prove that the separate
+pipeline identities have the required access.
+
+The reusable CI/CD templates must retain
+`ARM_PROVIDER_ENHANCED_VALIDATION_LOCATIONS: "false"` in every Terraform plan and
+apply job while Azure's public region metadata omits Saudi Arabia East. This
+only bypasses the stale location check; it does not make unavailable services
+deployable. A push/merge to `main` automatically triggers CD, so review the
+recovery plan before merging.
 
 ## Usage
 
