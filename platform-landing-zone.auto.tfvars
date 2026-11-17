@@ -166,8 +166,9 @@ management_group_settings = {
   # It refers to the alz_custom.alz_architecture_definition.yaml file in the lib folder.
   # Do not change this value unless you have created another architecture definition
   # with the name value specified below.
-  architecture_name  = "alz_custom"
-  location           = "$${starter_location_01}"
+  architecture_name = "alz_custom"
+  # Policy-assignment identities use a supported region, independently of workload locations.
+  location           = "uaenorth"
   parent_resource_id = "$${root_parent_management_group_id}"
   policy_default_values = {
     ddos_protection_plan_id                   = "$${ddos_protection_plan_id}"

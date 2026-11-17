@@ -29,13 +29,15 @@ omits unsupported capabilities:
 
 ## Saudi Arabia East deployment profile
 
-`platform-landing-zone.auto.tfvars` configures one region, `saudiarabiaeast`.
+`platform-landing-zone.auto.tfvars` configures workloads in `saudiarabiaeast`,
+with an approved exception for Azure Policy assignment identities in `uaenorth`.
 The profile keeps the standard ALZ management-group IDs, Virtual WAN, the sidecar
 VNet, Bastion, and Private DNS zones and links. Global governance and Private DNS
 resources still use Azure's `global` location where required.
 
 | Capability | Saudi profile |
 | --- | --- |
+| Policy-assignment managed identities | Per-policy system-assigned identities use UAE North because Azure rejected policy identity creation in Saudi Arabia East with `IdentityServiceUnavailable`. This changes identity placement, not the identity subscription, management-group scope, or workload location. |
 | Private DNS Resolver | Disabled, including its endpoints and dedicated subnet. Zones and links remain enabled. |
 | Log Analytics and central monitoring | Disabled: Azure rejected the workspace location, and the subscription's provider metadata also omits Saudi Arabia East for data collection rules/endpoints. The management module requires a workspace, so its monitoring resource group, AMA identity, DCRs, solutions, and optional Sentinel onboarding are omitted together. |
 | Monitoring deployment policies | Root overrides remove activity/resource log export and the workspace-backed Defender configuration assignment. Landing-zone overrides also remove SQL auditing to Log Analytics. Existing platform/landing-zone AMA exclusions remain in place. |
@@ -45,6 +47,21 @@ Microsoft's [Bastion public IP compatibility table](https://learn.microsoft.com/
 allows a nonzonal Bastion host to use an existing zonal or nonzonal public IP,
 but the pinned Bastion module's precondition is stricter. Both resources are
 configured without zones to satisfy the module and Saudi regional support.
+
+`management_group_settings.location = "uaenorth"` supplies the policy-assignment
+identity location. Keep `policy_default_values.resource_group_location` and
+`private_dns_zone_region` set to Saudi Arabia East: the ALZ library also uses its
+location input for policy defaults, so these explicit values prevent policy
+deployments from following the identity region. The networking region remains
+Saudi Arabia East. User-assigned identities are supported by Azure Policy, but
+switching identity type is not established as a workaround for this regional
+failure; this profile retains the standard, separately permissioned identities.
+
+The ALZ module applies one location to all policy assignments, including those
+without identities. Changing this input also replaces existing audit/deny
+assignments because their assignment location is immutable in Terraform.
+Review these replacements and the temporary enforcement gaps before applying;
+the change does not require replacing networking resources.
 
 These exclusions mean there is no centralized Log Analytics ingestion, VM
 Insights/change tracking, or workspace-backed Defender configuration supplied by
