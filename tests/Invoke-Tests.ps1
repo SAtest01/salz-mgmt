@@ -17,6 +17,8 @@ $fixtureRoot = Join-Path $PSScriptRoot "fixtures\computed-firewall-ip"
 $dataRoot = Join-Path ([System.IO.Path]::GetTempPath()) "alz-accelerator-terraform"
 $starterDataRoot = Join-Path $dataRoot "starter"
 $computedDataRoot = Join-Path $dataRoot "computed"
+$dnsRoot = Join-Path $moduleRoot "modules\vendor\private-dns-zones"
+$dnsDataRoot = Join-Path $dataRoot "saudi-dns"
 $linkedStarter = Join-Path $fixtureRoot ".terraform\starter"
 $previousDataDirectory = $env:TF_DATA_DIR
 
@@ -72,6 +74,12 @@ try {
       Invoke-Terraform -Directory $moduleRoot -Arguments @("init", "-backend=false", "-input=false", "-no-color")
     }
     Invoke-Terraform -Directory $moduleRoot -Arguments @("test", "-no-color")
+
+    $env:TF_DATA_DIR = $dnsDataRoot
+    if (-not $SkipInit) {
+      Invoke-Terraform -Directory $dnsRoot -Arguments @("init", "-backend=false", "-input=false", "-no-color")
+    }
+    Invoke-Terraform -Directory $dnsRoot -Arguments @("test", "-no-color")
   }
 
   $env:TF_DATA_DIR = $computedDataRoot

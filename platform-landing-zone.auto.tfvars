@@ -209,6 +209,17 @@ management_group_settings = {
     }
   }
   policy_assignments_to_modify = {
+    corp = {
+      policy_assignments = {
+        Deploy-Private-DNS-Zones = {
+          parameters = {
+            dnzZoneRegionShortNames = {
+              saudiarabiaeast = "sae"
+            }
+          }
+        }
+      }
+    }
     salz = {
       policy_assignments = {
         Deploy-MDFC-Config-H224 = {
