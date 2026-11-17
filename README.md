@@ -2,6 +2,11 @@
 
 This module is part of the Azure Landing Zones Accelerator solution. It is a complete multi-region implementation of the Azure Landing Zones Platform Landing Zone for Terraform.
 
+This deployment includes a pinned [Saudi Arabia East DNS compatibility patch](modules/vendor/README.md).
+It preserves the full DNS configuration and uses the Azure-confirmed Backup zone
+`privatelink.sae.backup.windowsazure.com`. Run `tests\Invoke-Tests.ps1` before an
+authenticated CI plan; passing mocked tests is not deployment approval.
+
 It deploys a hub and spoke virtual network or Virtual WAN architecture across multiple regions.
 
 The module deploys the following resources:
