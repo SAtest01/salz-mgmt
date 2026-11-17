@@ -327,7 +327,8 @@ virtual_hubs = {
       name                  = "$${primary_bastion_host_name}"
       zones                 = []
       bastion_public_ip = {
-        name = "$${primary_bastion_host_public_ip_name}"
+        name  = "$${primary_bastion_host_public_ip_name}"
+        zones = []
       }
     }
     sidecar_virtual_network = {

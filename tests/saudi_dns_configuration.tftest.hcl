@@ -75,9 +75,9 @@ run "saudi_available_services_profile" {
     condition = (
       module.config.outputs.virtual_hubs.primary.enabled_resources.bastion &&
       length(module.config.outputs.virtual_hubs.primary.bastion.zones) == 0 &&
-      module.config.outputs.virtual_hubs.primary.bastion.bastion_public_ip.zones == null
+      length(module.config.outputs.virtual_hubs.primary.bastion.bastion_public_ip.zones) == 0
     )
-    error_message = "Bastion must remain enabled without host availability zones, preserving the existing public IP configuration."
+    error_message = "Bastion must remain enabled with matching empty zone sets on the host and public IP, as required by the pinned Bastion module."
   }
 
   assert {

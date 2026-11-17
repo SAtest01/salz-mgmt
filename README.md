@@ -39,10 +39,12 @@ resources still use Azure's `global` location where required.
 | Private DNS Resolver | Disabled, including its endpoints and dedicated subnet. Zones and links remain enabled. |
 | Log Analytics and central monitoring | Disabled: Azure rejected the workspace location, and the subscription's provider metadata also omits Saudi Arabia East for data collection rules/endpoints. The management module requires a workspace, so its monitoring resource group, AMA identity, DCRs, solutions, and optional Sentinel onboarding are omitted together. |
 | Monitoring deployment policies | Root overrides remove activity/resource log export and the workspace-backed Defender configuration assignment. Landing-zone overrides also remove SQL auditing to Log Analytics. Existing platform/landing-zone AMA exclusions remain in place. |
-| Bastion | Enabled with `zones = []` on the host. The existing zone-redundant Standard public IP is left unchanged; Azure rejected Bastion host zones, not that successfully created public IP. |
+| Bastion | Enabled with `zones = []` on both the host and its Standard public IP. The pinned Bastion module requires matching zone sets. Changing the existing public IP's zones requires replacement. |
 
 Microsoft's [Bastion public IP compatibility table](https://learn.microsoft.com/azure/bastion/configuration-settings#configure-public-ip-addresses-with-availability-zones-configured)
-allows a nonzonal Bastion host to use an existing zonal or nonzonal public IP.
+allows a nonzonal Bastion host to use an existing zonal or nonzonal public IP,
+but the pinned Bastion module's precondition is stricter. Both resources are
+configured without zones to satisfy the module and Saudi regional support.
 
 These exclusions mean there is no centralized Log Analytics ingestion, VM
 Insights/change tracking, or workspace-backed Defender configuration supplied by
@@ -59,7 +61,9 @@ capabilities.
 Keep the existing remote Terraform state. Run **01 CI** for a fresh plan before
 **02 CD**; a previous successful plan cannot be reused after changing this profile.
 Review all deletions/replacements, especially the monitoring resource group and
-its unused AMA identity, the DNS resolver subnet, and the failed Bastion host.
+its unused AMA identity, the DNS resolver subnet, and the Bastion host/public IP.
+The existing Bastion public IP will be replaced to remove its zones, so its
+address can change; the failed Bastion host may also need replacement.
 Disabling a managed resource group can delete any resources inside it, including
 resources not represented in this configuration.
 
